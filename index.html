@@ -8,8 +8,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: linear-gradient(135deg, #020b18 0%, #061a3a 50%, #030d1f 100%);
-      color: #e2e8f0;
+      background: linear-gradient(135deg, #001020 0%, #012456 55%, #000d1e 100%);
+      color: #d4d4d4;
       font-family: 'Segoe UI', system-ui, sans-serif;
       font-size: 14px;
       height: 100vh;
@@ -30,17 +30,17 @@
     }
     body::before {
       width: 500px; height: 500px;
-      background: radial-gradient(circle, #1d4ed8 0%, transparent 70%);
+      background: radial-gradient(circle, #2672ec 0%, transparent 70%);
       top: -120px; left: -100px;
     }
     body::after {
       width: 400px; height: 400px;
-      background: radial-gradient(circle, #0891b2 0%, transparent 70%);
+      background: radial-gradient(circle, #1a56b0 0%, transparent 70%);
       bottom: -100px; right: -80px;
     }
     #blob3 {
       width: 300px; height: 300px;
-      background: radial-gradient(circle, #4338ca 0%, transparent 70%);
+      background: radial-gradient(circle, #0e3a78 0%, transparent 70%);
       top: 40%; left: 55%;
       transform: translate(-50%, -50%);
     }
@@ -57,18 +57,18 @@
     }
 
     header {
-      background: rgba(29, 78, 216, 0.18);
+      background: rgba(1, 36, 86, 0.55);
       backdrop-filter: blur(18px) saturate(200%);
       -webkit-backdrop-filter: blur(18px) saturate(200%);
-      border-bottom: 1px solid rgba(96, 165, 250, 0.2);
+      border-bottom: 1px solid rgba(38, 114, 236, 0.35);
       padding: 10px 20px;
       display: flex; align-items: center; gap: 12px; flex-shrink: 0;
     }
-    header h1 { font-size: 15px; font-weight: 700; color: #bfdbfe; letter-spacing: 0.3px; }
+    header h1 { font-size: 15px; font-weight: 700; color: #9cdcfe; letter-spacing: 0.3px; }
 
     .badge { font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 600; }
-    .badge-ps    { background: rgba(29, 78, 216, 0.35); border: 1px solid rgba(96, 165, 250, 0.4); color: #93c5fd; }
-    .badge-clean { background: rgba(6, 182, 212, 0.2);  border: 1px solid rgba(6, 182, 212, 0.4);  color: #67e8f9; display: none; }
+    .badge-ps    { background: rgba(38, 114, 236, 0.3); border: 1px solid rgba(38, 114, 236, 0.5); color: #9cdcfe; }
+    .badge-clean { background: rgba(78, 201, 176, 0.2); border: 1px solid rgba(78, 201, 176, 0.4); color: #4ec9b0; display: none; }
 
     .toolbar {
       background: rgba(255, 255, 255, 0.04);
@@ -84,15 +84,15 @@
       cursor: pointer; font-size: 13px; font-weight: 500;
       transition: all .15s ease;
     }
-    .btn-primary   { background: rgba(29, 78, 216, 0.55); border: 1px solid rgba(96, 165, 250, 0.4); color: #dbeafe; box-shadow: 0 0 12px rgba(29, 78, 216, 0.3); }
-    .btn-primary:hover   { background: rgba(29, 78, 216, 0.75); box-shadow: 0 0 20px rgba(29, 78, 216, 0.5); transform: translateY(-1px); }
+    .btn-primary   { background: rgba(38, 114, 236, 0.5); border: 1px solid rgba(156, 220, 254, 0.35); color: #9cdcfe; box-shadow: 0 0 12px rgba(38, 114, 236, 0.3); }
+    .btn-primary:hover   { background: rgba(38, 114, 236, 0.72); box-shadow: 0 0 20px rgba(38, 114, 236, 0.5); transform: translateY(-1px); }
     .btn-secondary { background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; }
     .btn-secondary:hover { background: rgba(255, 255, 255, 0.13); transform: translateY(-1px); }
     .btn-danger    { background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
     .btn-danger:hover    { background: rgba(239, 68, 68, 0.3); box-shadow: 0 0 12px rgba(239, 68, 68, 0.25); transform: translateY(-1px); }
 
     .sep { width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 4px; }
-    .status-msg { margin-left: auto; font-size: 12px; color: #67e8f9; min-width: 220px; text-align: right; }
+    .status-msg { margin-left: auto; font-size: 12px; color: #9cdcfe; min-width: 220px; text-align: right; }
     .status-msg.err { color: #fca5a5; }
 
     .panels { display: flex; flex: 1; overflow: hidden; }
@@ -116,8 +116,8 @@
     }
 
     .dot        { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); }
-    .dot.active { background: #22d3ee; box-shadow: 0 0 6px #22d3ee; }
-    .dot.ready  { background: #34d399; box-shadow: 0 0 6px #34d399; }
+    .dot.active { background: #9cdcfe; box-shadow: 0 0 6px #9cdcfe; }
+    .dot.ready  { background: #4ec9b0; box-shadow: 0 0 6px #4ec9b0; }
 
     #input {
       flex: 1; background: transparent; color: #e2e8f0;
@@ -138,24 +138,24 @@
 
     #plain-output {
       width: 100%; height: 120px;
-      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 8px; resize: vertical; color: #67e8f9;
+      background: rgba(0,0,0,0.35); border: 1px solid rgba(38, 114, 236, 0.2);
+      border-radius: 8px; resize: vertical; color: #9cdcfe;
       font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
       font-size: 12px; line-height: 1.5; padding: 10px;
       margin-top: 12px; outline: none;
     }
     #plain-output::placeholder { color: rgba(255,255,255,0.15); }
 
-    /* PS syntax highlight token colors */
-    .ps-comment  { color: #475569; font-style: italic; }
-    .ps-string   { color: #fbbf24; }
-    .ps-var      { color: #67e8f9; }
-    .ps-type     { color: #fde68a; }
-    .ps-keyword  { color: #a78bfa; font-weight: 600; }
-    .ps-cmdlet   { color: #34d399; }
-    .ps-param    { color: #93c5fd; }
-    .ps-op       { color: #94a3b8; }
-    .ps-number   { color: #86efac; }
+    /* PS syntax highlight — VS Code PowerShell extension palette */
+    .ps-comment  { color: #6a9955; font-style: italic; }
+    .ps-string   { color: #ce9178; }
+    .ps-var      { color: #9cdcfe; }
+    .ps-type     { color: #4ec9b0; }
+    .ps-keyword  { color: #569cd6; font-weight: 600; }
+    .ps-cmdlet   { color: #dcdcaa; }
+    .ps-param    { color: #9cdcfe; }
+    .ps-op       { color: #d4d4d4; }
+    .ps-number   { color: #b5cea8; }
 
     #info-bar {
       font-size: 11px; color: rgba(255,255,255,0.35);
@@ -166,10 +166,10 @@
     }
 
     footer {
-      background: rgba(29, 78, 216, 0.2);
+      background: rgba(1, 36, 86, 0.5);
       backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-      border-top: 1px solid rgba(96, 165, 250, 0.2);
-      color: rgba(147, 197, 253, 0.8);
+      border-top: 1px solid rgba(38, 114, 236, 0.3);
+      color: rgba(156, 220, 254, 0.7);
       font-size: 11px; padding: 4px 16px;
       display: flex; gap: 16px; align-items: center; flex-shrink: 0;
     }
