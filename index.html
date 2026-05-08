@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PowerShell Cleaner</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: linear-gradient(135deg, #020b18 0%, #061a3a 50%, #030d1f 100%);
+      color: #e2e8f0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    body::before, body::after, #blob3 {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+      opacity: 0.3;
+    }
+    body::before {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #1d4ed8 0%, transparent 70%);
+      top: -120px; left: -100px;
+    }
+    body::after {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #0891b2 0%, transparent 70%);
+      bottom: -100px; right: -80px;
+    }
+    #blob3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, #4338ca 0%, transparent 70%);
+      top: 40%; left: 55%;
+      transform: translate(-50%, -50%);
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.055);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    header, .toolbar, .panels, #info-bar, footer {
+      position: relative; z-index: 1;
+    }
+
+    header {
+      background: rgba(29, 78, 216, 0.18);
+      backdrop-filter: blur(18px) saturate(200%);
+      -webkit-backdrop-filter: blur(18px) saturate(200%);
+      border-bottom: 1px solid rgba(96, 165, 250, 0.2);
+      padding: 10px 20px;
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    header h1 { font-size: 15px; font-weight: 700; color: #bfdbfe; letter-spacing: 0.3px; }
+
+    .badge { font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 600; }
+    .badge-ps    { background: rgba(29, 78, 216, 0.35); border: 1px solid rgba(96, 165, 250, 0.4); color: #93c5fd; }
+    .badge-clean { background: rgba(6, 182, 212, 0.2);  border: 1px solid rgba(6, 182, 212, 0.4);  color: #67e8f9; display: none; }
+
+    .toolbar {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 8px 20px;
+      display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap;
+    }
+
+    button {
+      border: none; border-radius: 8px; padding: 6px 16px;
+      cursor: pointer; font-size: 13px; font-weight: 500;
+      transition: all .15s ease;
+    }
+    .btn-primary   { background: rgba(29, 78, 216, 0.55); border: 1px solid rgba(96, 165, 250, 0.4); color: #dbeafe; box-shadow: 0 0 12px rgba(29, 78, 216, 0.3); }
+    .btn-primary:hover   { background: rgba(29, 78, 216, 0.75); box-shadow: 0 0 20px rgba(29, 78, 216, 0.5); transform: translateY(-1px); }
+    .btn-secondary { background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.12); color: #cbd5e1; }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.13); transform: translateY(-1px); }
+    .btn-danger    { background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; }
+    .btn-danger:hover    { background: rgba(239, 68, 68, 0.3); box-shadow: 0 0 12px rgba(239, 68, 68, 0.25); transform: translateY(-1px); }
+
+    .sep { width: 1px; height: 24px; background: rgba(255,255,255,0.1); margin: 0 4px; }
+    .status-msg { margin-left: auto; font-size: 12px; color: #67e8f9; min-width: 220px; text-align: right; }
+    .status-msg.err { color: #fca5a5; }
+
+    .panels { display: flex; flex: 1; overflow: hidden; }
+
+    .panel {
+      display: flex; flex-direction: column; flex: 1; overflow: hidden;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-right: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .panel:last-child { border-right: none; }
+
+    .panel-header {
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 7px 16px;
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 1.2px;
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    }
+
+    .dot        { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+    .dot.active { background: #22d3ee; box-shadow: 0 0 6px #22d3ee; }
+    .dot.ready  { background: #34d399; box-shadow: 0 0 6px #34d399; }
+
+    #input {
+      flex: 1; background: transparent; color: #e2e8f0;
+      border: none; outline: none; resize: none; padding: 16px;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px; line-height: 1.6; tab-size: 4;
+    }
+    #input::placeholder { color: rgba(255,255,255,0.18); }
+
+    #output-wrap { flex: 1; overflow: auto; padding: 16px; background: transparent; }
+
+    #output {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px; line-height: 1.6;
+      white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word;
+      min-height: 60%;
+    }
+
+    #plain-output {
+      width: 100%; height: 120px;
+      background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; resize: vertical; color: #67e8f9;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 12px; line-height: 1.5; padding: 10px;
+      margin-top: 12px; outline: none;
+    }
+    #plain-output::placeholder { color: rgba(255,255,255,0.15); }
+
+    /* PS syntax highlight token colors */
+    .ps-comment  { color: #475569; font-style: italic; }
+    .ps-string   { color: #fbbf24; }
+    .ps-var      { color: #67e8f9; }
+    .ps-type     { color: #fde68a; }
+    .ps-keyword  { color: #a78bfa; font-weight: 600; }
+    .ps-cmdlet   { color: #34d399; }
+    .ps-param    { color: #93c5fd; }
+    .ps-op       { color: #94a3b8; }
+    .ps-number   { color: #86efac; }
+
+    #info-bar {
+      font-size: 11px; color: rgba(255,255,255,0.35);
+      padding: 4px 16px;
+      background: rgba(255,255,255,0.03);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      min-height: 22px; flex-shrink: 0;
+    }
+
+    footer {
+      background: rgba(29, 78, 216, 0.2);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(96, 165, 250, 0.2);
+      color: rgba(147, 197, 253, 0.8);
+      font-size: 11px; padding: 4px 16px;
+      display: flex; gap: 16px; align-items: center; flex-shrink: 0;
+    }
+    #char-count { margin-left: auto; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+  </style>
+</head>
+<body>
+
+<div id="blob3"></div>
+
+<header>
+  <h1>PowerShell Cleaner</h1>
+  <span class="badge badge-ps">PS Aware</span>
+  <span class="badge badge-clean" id="badge-clean">&#10003; Cleaned</span>
+</header>
+
+<div class="toolbar">
+  <button class="btn-primary"   onclick="clean()">&#9654; Clean</button>
+  <button class="btn-secondary" onclick="copyOutput()">&#10040; Copy Output</button>
+  <button class="btn-secondary" onclick="loadExample()">&#10753; Load Example</button>
+  <div class="sep"></div>
+  <button class="btn-danger"    onclick="clearAll()">&#10005; Clear</button>
+  <span class="status-msg" id="status"></span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="panel-header"><div class="dot active"></div>Broken Input — paste terminal copy here</div>
+    <textarea id="input" placeholder="Paste broken PowerShell here (terminal line-wrap artifacts)..." spellcheck="false" oninput="onInput()"></textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><div class="dot" id="output-dot"></div>Clean Output</div>
+    <div id="output-wrap">
+      <div id="output"></div>
+      <textarea id="plain-output" spellcheck="false" readonly placeholder="Clean script appears here..."></textarea>
+    </div>
+  </div>
+</div>
+
+<div id="info-bar"></div>
+
+<footer>
+  <span>PowerShell Cleaner</span>
+  <span>Removes terminal word-wrap artifacts &middot; PS syntax highlight</span>
+  <span id="char-count">0 chars</span>
+</footer>
+
+<script>
+  const inputEl   = document.getElementById('input');
+  const outputEl  = document.getElementById('output');
+  const plainEl   = document.getElementById('plain-output');
+  const statusEl  = document.getElementById('status');
+  const outputDot = document.getElementById('output-dot');
+  const charCount = document.getElementById('char-count');
+  const infoBar   = document.getElementById('info-bar');
+  const badgeClean = document.getElementById('badge-clean');
+
+  function setStatus(msg, isErr) {
+    statusEl.textContent = msg;
+    statusEl.className = 'status-msg' + (isErr ? ' err' : '');
+    setTimeout(() => statusEl.textContent = '', 4000);
+  }
+
+  function onInput() {
+    charCount.textContent = inputEl.value.length + ' chars';
+  }
+
+  // ── PS token highlighter ────────────────────────────────────────────────────
+  // Tokenizes via a single regex alternation. Groups (in order):
+  //   1: comment   2: string   3: variable   4: type literal
+  //   5: operator  6: keyword  7: parameter  8: cmdlet   9: number
+  const TOKEN_RE = new RegExp([
+    '(#[^\\n]*)',
+    '("(?:[^"\\\\`]|`[\\s\\S])*"|\'[^\']*\')',
+    '(\\$(?:\\{[^}]+\\}|[\\w:?]+))',
+    '(\\[[A-Za-z][\\w.]*(?:\\[\\])?\\])',
+    '(-(?:eq|ne|gt|lt|ge|le|match|notmatch|like|notlike|contains|notcontains|in|notin|and|or|not|is|isnot|as|replace|split|join|band|bor|bxor|bnot|shl|shr|f)\\b)',
+    '\\b(if|elseif|else|foreach|for|while|do|until|switch|try|catch|finally|function|filter|return|break|continue|throw|exit|param|begin|process|end|class|enum|using|trap)\\b',
+    '(-[A-Za-z]\\w*)',
+    '\\b([A-Z][a-z]+-[A-Za-z]\\w*)\\b',
+    '\\b(\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?(?:KB|MB|GB|TB)?)\\b',
+    '([\\s\\S])'
+  ].join('|'), 'g');
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function span(cls, txt) {
+    return '<span class="' + cls + '">' + esc(txt) + '</span>';
+  }
+
+  function highlightPS(code) {
+    TOKEN_RE.lastIndex = 0;
+    let out = '', m;
+    while ((m = TOKEN_RE.exec(code)) !== null) {
+      if      (m[1]) out += span('ps-comment',  m[1]);
+      else if (m[2]) out += span('ps-string',   m[2]);
+      else if (m[3]) out += span('ps-var',      m[3]);
+      else if (m[4]) out += span('ps-type',     m[4]);
+      else if (m[5]) out += span('ps-op',       m[5]);
+      else if (m[6]) out += span('ps-keyword',  m[6]);
+      else if (m[7]) out += span('ps-param',    m[7]);
+      else if (m[8]) out += span('ps-cmdlet',   m[8]);
+      else if (m[9]) out += span('ps-number',   m[9]);
+      else           out += esc(m[0]);
+    }
+    return out;
+  }
+
+  // ── Terminal wrap cleaner ───────────────────────────────────────────────────
+  // Joins lines that are terminal word-wrap artifacts.
+  //
+  // A line is kept as a new statement when:
+  //   - It is empty (block separator)
+  //   - It starts with # (comment)
+  //   - It starts with $ (new variable statement)
+  //   - It starts with a PS keyword
+  //   - The previous line ended with a natural PS terminator: ; { } | `
+  //
+  // Everything else is joined to the previous line without a separator,
+  // reversing the terminal character-level word-wrap.
+
+  const NATURAL_TERM = new Set([';', '{', '}', '|', '`']);
+  const KEYWORD_RE   = /^(if|elseif|else|foreach|for|while|do|until|switch|try|catch|finally|function|filter|return|break|continue|throw|exit|param|begin|process|end|class|enum)\b/i;
+  const NEW_STMT_RE  = /^[\s]*[\$#@]/;
+
+  function cleanPS(raw) {
+    const lines = raw.split('\n');
+    const out   = [];
+    let joins   = 0;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line    = lines[i];
+      const trimmed = line.trimStart();
+
+      // First line — just push
+      if (out.length === 0) {
+        out.push(line.trimEnd());
+        continue;
+      }
+
+      const prev     = out[out.length - 1];
+      const prevLast = prev.trimEnd().slice(-1);
+
+      // Empty line = hard block separator
+      if (trimmed.trim() === '') {
+        out.push('');
+        continue;
+      }
+
+      // Comment = always its own line
+      if (trimmed.startsWith('#')) {
+        out.push(line.trimEnd());
+        continue;
+      }
+
+      // Previous line ended with natural PS terminator
+      if (NATURAL_TERM.has(prevLast)) {
+        out.push(line.trimEnd());
+        continue;
+      }
+
+      // Current line starts a new PS statement
+      if (NEW_STMT_RE.test(line) || KEYWORD_RE.test(trimmed)) {
+        out.push(line.trimEnd());
+        continue;
+      }
+
+      // Continuation — join to previous line (no separator: terminal broke mid-word)
+      out[out.length - 1] = prev.trimEnd() + trimmed;
+      joins++;
+    }
+
+    // Remove trailing empty lines
+    while (out.length > 0 && out[out.length - 1].trim() === '') out.pop();
+
+    return { code: out.join('\n'), joins };
+  }
+
+  // ── Main actions ────────────────────────────────────────────────────────────
+
+  function clean() {
+    const raw = inputEl.value;
+    if (!raw.trim()) { setStatus('Nothing to clean', true); return; }
+
+    const { code, joins } = cleanPS(raw);
+
+    outputEl.innerHTML = highlightPS(code);
+    plainEl.value = code;
+    outputEl._plain = code;
+
+    outputDot.className = 'dot ready';
+    badgeClean.style.display = 'inline-block';
+
+    infoBar.textContent = joins > 0
+      ? 'Joined ' + joins + ' terminal wrap artifact' + (joins === 1 ? '' : 's')
+      : 'No wrap artifacts detected — output unchanged';
+
+    setStatus(joins > 0 ? 'Cleaned — ' + joins + ' line' + (joins === 1 ? '' : 's') + ' joined' : 'Already clean');
+  }
+
+  function copyOutput() {
+    const plain = outputEl._plain;
+    if (!plain) { setStatus('Nothing to copy', true); return; }
+    navigator.clipboard.writeText(plain)
+      .then(() => setStatus('Copied to clipboard'))
+      .catch(() => {
+        plainEl.select();
+        document.execCommand('copy');
+        setStatus('Copied to clipboard');
+      });
+  }
+
+  function clearAll() {
+    inputEl.value = '';
+    outputEl.innerHTML = '';
+    outputEl._plain = '';
+    plainEl.value = '';
+    outputDot.className = 'dot';
+    badgeClean.style.display = 'none';
+    infoBar.textContent = '';
+    charCount.textContent = '0 chars';
+    setStatus('Cleared');
+  }
+
+  // Example: Acrobat version check with artificial terminal wrap at ~80 chars
+  const EXAMPLE = `$targetVersion = [version]"26.001.21529"
+$app = Get-ItemProperty -Path @("HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*","HK
+LM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*") -ErrorAction
+SilentlyContinue | Where-Object { $_.DisplayName -like "*Acrobat Reader*" } | Select-Object Display
+Name, DisplayVersion -First 1
+if (-not $app) { Write-Output "Acrobat Reader not found" } else { Write-Output "Found: $($app.Dis
+playName)"; Write-Output "Installed: $($app.DisplayVersion)"; Write-Output "Target: $targetVersi
+on"; $current = [version]$app.DisplayVersion; if ($current -ge $targetVersion) { Write-Output "PAS
+S - Up to date" } else { Write-Output "FAIL - Patch needed" } }`;
+
+  function loadExample() {
+    inputEl.value = EXAMPLE;
+    charCount.textContent = EXAMPLE.length + ' chars';
+    clean();
+    setStatus('Example loaded — ' + EXAMPLE.split('\n').length + ' broken lines');
+  }
+
+  // Auto-clean on paste
+  inputEl.addEventListener('paste', () => setTimeout(() => clean(), 50));
+
+  // Ctrl+Enter to clean
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      clean();
+    }
+  });
+</script>
+</body>
+</html>
