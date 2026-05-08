@@ -348,8 +348,15 @@
         continue;
       }
 
-      // Continuation — join to previous line (no separator: terminal broke mid-word)
-      out[out.length - 1] = prev.trimEnd() + trimmed;
+      // Continuation — join to previous line.
+      // Tilix drops the space at the wrap point, so add one when both sides
+      // are word characters (e.g. "-ErrorAction" + "SilentlyContinue").
+      // Mid-word string breaks (e.g. "HK" + "LM:\...") also match, but a
+      // stray space inside a path string is the rarer failure mode.
+      const prevEnd   = prev.trimEnd().slice(-1);
+      const nextStart = trimmed.charAt(0);
+      const sep = /\w/.test(prevEnd) && /\w/.test(nextStart) ? ' ' : '';
+      out[out.length - 1] = prev.trimEnd() + sep + trimmed;
       joins++;
     }
 
@@ -406,11 +413,12 @@
   }
 
   // Example: Acrobat version check with artificial terminal wrap at ~80 chars
+  // Example reflects actual Tilix behavior: space dropped at wrap point
   const EXAMPLE = `$targetVersion = [version]"26.001.21529"
 $app = Get-ItemProperty -Path @("HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*","HK
 LM:\\Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*") -ErrorAction
-SilentlyContinue | Where-Object { $_.DisplayName -like "*Acrobat Reader*" } | Select-Object Display
-Name, DisplayVersion -First 1
+SilentlyContinue | Where-Object { $_.DisplayName -like "*Acrobat Reader*" } | Select-Object
+DisplayName, DisplayVersion -First 1
 if (-not $app) { Write-Output "Acrobat Reader not found" } else { Write-Output "Found: $($app.Dis
 playName)"; Write-Output "Installed: $($app.DisplayVersion)"; Write-Output "Target: $targetVersi
 on"; $current = [version]$app.DisplayVersion; if ($current -ge $targetVersion) { Write-Output "PAS
