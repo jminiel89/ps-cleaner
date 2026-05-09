@@ -222,7 +222,7 @@
 
 <footer>
   <span>PowerShell Cleaner</span>
-  <span>Removes terminal word-wrap artifacts &middot; PS syntax highlight</span>
+  <span>Removes terminal word-wrap artifacts &middot; Fixes missing spaces &middot; PS syntax highlight</span>
   <span id="char-count">0 chars</span>
 </footer>
 
@@ -355,7 +355,9 @@
       // stray space inside a path string is the rarer failure mode.
       const prevEnd   = prev.trimEnd().slice(-1);
       const nextStart = trimmed.charAt(0);
-      const sep = /\w/.test(prevEnd) && /\w/.test(nextStart) ? ' ' : '';
+      let sep = '';
+      if (/\w/.test(prevEnd) && /[\w"'($@\[-]/.test(nextStart)) sep = ' ';
+      else if (/["')\]]/.test(prevEnd) && /[-\w]/.test(nextStart)) sep = ' ';
       out[out.length - 1] = prev.trimEnd() + sep + trimmed;
       joins++;
     }
